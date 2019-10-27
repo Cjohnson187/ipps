@@ -23,12 +23,23 @@ public class ipps {
     // method to split string and not ignore comma provided by Mr. Motha.
     public static ArrayList<String> csv_split(String line) {
         ArrayList<String> data = new ArrayList<String>();
-        while (true) {
+        boolean loop = true;
+        while (loop) {
             String s = "";
             //String quote = String.valueOf('"');
             boolean inString = false;
             for (String c : line.split("")) {
-                line = slice_start(line, 1);
+                System.out.println(c);
+
+                System.out.println(line);
+                if (line.length() > 1) {
+                    line = line.substring(1);
+                }
+                else {
+                    loop = false;
+                }
+
+                //line = line.substring(1);
                 if (c.equals(String.valueOf('"'))) {
                     inString = !inString;
                     continue;
@@ -91,7 +102,7 @@ public class ipps {
 
             preparedStmt = conn.prepareStatement(query);
 
-
+            String heading = csvReader1.readLine();
             while ((line = csvReader1.readLine()) != null) {
                 data = csv_split(line);
 
