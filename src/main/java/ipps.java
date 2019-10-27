@@ -105,6 +105,10 @@ public class ipps {
             String heading = csvReader1.readLine();
             while ((line = csvReader1.readLine()) != null) {
                 data = csv_split(line);
+                int drg_id = Integer.parseInt(data.get(0).substring(0,3));
+                String drg = data.get(0).substring(3);
+                System.out.println(drg_id +  "   drg id");
+                System.out.println(drg);
 
                 preparedStmt.setString (1, data.get(0).toString());
                 preparedStmt.setInt    (2, Integer.parseInt(data.get(1)));
