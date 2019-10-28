@@ -97,7 +97,7 @@ public class ipps {
                     + " values (?, ?) ON DUPLICATE KEY UPDATE ID=ID";
 
             String query_Hospital_Referral = " insert into Hospital_Referral (Refferring_Hospital_ID, Hospital_Referral_State, Hospital_Referral_City)"
-                    + " values (?, ?, ?) ON DUPLICATE KEY UPDATE Hospital_Referral_State=Hospital_Referral_State";
+                    + " values (?, ?, ?) ON DUPLICATE KEY UPDATE Refferring_Hospital_ID=Refferring_Hospital_ID";
 
             String query_Provider = " insert into Provider (Provider_ID, Provider_Name, Provider_Street_Address, "
                     + "Provider_City, Provider_State, Provider_Zip)"
@@ -123,7 +123,6 @@ public class ipps {
                 String drg = data.get(0).substring(5);
 
                 int provider_id = Integer.parseInt(data.get(1));
-                System.out.println(provider_id);
                 String prvider_name = data.get(2);
                 String provider_street_address = data.get(3);
                 String provider_city = data.get(4);
@@ -132,7 +131,6 @@ public class ipps {
 
                 String referral_state = data.get(7).substring(0,2);
                 String referral_city = data.get(7).substring(4);
-                System.out.println(referral_state+" " +referral_city+ " "+ provider_state+ " rc rf");
 
                 int total_discharges = Integer.parseInt(data.get(8));
                 float avg_covered_charges = Float.parseFloat(data.get(9));
