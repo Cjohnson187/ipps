@@ -15,11 +15,6 @@ import java.util.*;
 public class ipps {
     private static final String Configuration_File = "src/configuration.properties";
 
-    // slice method like in python
-    public static String slice_start(String s, int startIndex) {
-        if (startIndex < 0) startIndex = s.length() + startIndex;
-        return s.substring(startIndex);
-    }
     // method to split string and not ignore comma provided by Mr. Motha.
     public static ArrayList<String> csv_split(String line) {
         ArrayList<String> data = new ArrayList<String>();
@@ -77,7 +72,11 @@ public class ipps {
         String line = "";
         ArrayList<String> data = new ArrayList<String>();
 
-        PreparedStatement preparedStmt = null;
+        PreparedStatement prepared_stmt_DRG = null;
+        PreparedStatement prepared_stmt_Hospital_Referral = null;
+        PreparedStatement prepared_stmt_Provider = null;
+        PreparedStatement prepared_stmt_Charges = null;
+
 
         BufferedReader csvReader1 = new BufferedReader(new FileReader
                 ("src\\input_files\\test1.csv" ));
@@ -93,38 +92,78 @@ public class ipps {
 
         try {
             // ***********************************************************************
-            // insert test
-            String query = " insert into ipps_main (DRG_Definition, Provider_ID, Provider_Name, " +
-                    "Provider_Street_address, Provider_City, Provider_State, Provider_Zip, " +
-                    "Hospital_Referral_Region, Total_Discharges, Average_Covered_Charges, " +
-                    "Average_Total_Payments, Average_Medicare_Payments)"
-                    + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-            preparedStmt = conn.prepareStatement(query);
+            String query_DRG = " insert into DRG (ID, DRG)"
+                    + " values (?, ?)";
 
+            String query_Hospital_Referral = " insert into Hospital_Referral (Hospital_Referral_State, Hospital_Referral_City)"
+                    + " values (?, ?)";
+
+            String query_Provider = " insert into Provider (Provider_ID, Provider_Name, Provider_Street_Address, "
+                    + "Provider_City, Provide_State, Provider_Zip, Hospital_Referral_ID)"
+                    + " values (?, ?, ?, ?, ?, ?)";
+
+            String query_Charges = " insert into Charges (Total_Discharges, Average_Covered_Charges, Average_Total_Payments, "
+                    + "Average_Medicare_Payments)"
+                    + " values (?, ?, ?, ?)";
+
+            prepared_stmt_DRG = conn.prepareStatement(query_DRG);
+            prepared_stmt_Hospital_Referral = conn.prepareStatement(query_Hospital_Referral);
+            prepared_stmt_Provider = conn.prepareStatement(query_Provider);
+            prepared_stmt_Charges = conn.prepareStatement(query_Charges);
+
+
+            // just skipping the header in csv file
             String heading = csvReader1.readLine();
             while ((line = csvReader1.readLine()) != null) {
                 data = csv_split(line);
-                int drg_id = Integer.parseInt(data.get(0).substring(0,3));
-                String drg = data.get(0).substring(3);
-                System.out.println(drg_id +  "   drg id");
-                System.out.println(drg);
 
-                preparedStmt.setString (1, data.get(0).toString());
-                preparedStmt.setInt    (2, Integer.parseInt(data.get(1)));
-                preparedStmt.setString (3, data.get(2));
-                preparedStmt.setString (4, data.get(3));
-                preparedStmt.setString (5, data.get(4));
-                preparedStmt.setString (6, data.get(5));
-                preparedStmt.setInt    (7, Integer.parseInt(data.get(6)));
-                preparedStmt.setString (8, data.get(7));
-                preparedStmt.setInt    (9, Integer.parseInt(data.get(8)));
-                preparedStmt.setFloat  (10, Float.parseFloat(data.get(9)));
-                preparedStmt.setFloat  (11, Float.parseFloat(data.get(10)));
-                preparedStmt.setFloat  (12, Float.parseFloat(data.get(11)));
+                int drg_id = Integer.parseInt(data.get(0).substring(0,3));
+                String drg = data.get(0).substring(5);
+
+                int provider_id = Integer.parseInt(data.get(1));
+                String prvider_name = data.get(2);
+                String provider_street_address = data.get(3);
+                String provider_city = data.get(4);
+                String provider_state = data.get(5);
+                int provider_zip = Integer.parseInt(data.get(6));
+
+                String referral_state = data.get(7).substring(0,2);
+                String referral_city = data.get(7).substring(4);
+
+                int total_discharges = Integer.parseInt(data.get(8));
+                float avg_covered_charges = Float.parseFloat(data.get(9));
+                float avg_total_payments = Float.parseFloat(data.get(10));
+                float avg_medicare_payments = Float.parseFloat(data.get(11));
+
+                // drg table
+                prepared_stmt_DRG.setInt (1, drg_id);
+                prepared_stmt_DRG.setString    (2, drg);
+
+                // Hospital Referral table
+                prepared_stmt_Hospital_Referral.setString (1, referral_state);
+                prepared_stmt_Hospital_Referral.setString (2, referral_city);
+
+                // provider table
+                prepared_stmt_Provider.setInt (1, provider_id);
+                prepared_stmt_Provider.setString (2, prvider_name);
+                prepared_stmt_Provider.setString    (3, provider_street_address);
+                prepared_stmt_Provider.setString (4, provider_city);
+                prepared_stmt_Provider.setString    (5, provider_state);
+                prepared_stmt_Provider.setInt  (6, provider_zip);
+
+                // charges table
+                prepared_stmt_Charges.setInt  (1, total_discharges);
+                prepared_stmt_Charges.setFloat  (2, avg_covered_charges);
+                prepared_stmt_Charges.setFloat  (3, avg_total_payments);
+                prepared_stmt_Charges.setFloat  (4, avg_medicare_payments);
 
                 // execute the prepared statement
-                preparedStmt.execute();
+                prepared_stmt_DRG.execute();
+                prepared_stmt_Hospital_Referral.execute();
+                prepared_stmt_Provider.execute();
+                prepared_stmt_Charges.execute();
+
 
             }
             //test reader just 2 lines in csv file
@@ -140,12 +179,33 @@ public class ipps {
         }
         finally {
 
-            if (preparedStmt != null) {
+            if (prepared_stmt_DRG != null) {
                 try {
-                    preparedStmt.close();
+                    prepared_stmt_DRG.close();
                 } catch (SQLException sqlEx) { }
 
-                preparedStmt = null;
+                prepared_stmt_DRG = null;
+            }
+            if (prepared_stmt_Hospital_Referral != null) {
+                try {
+                    prepared_stmt_Hospital_Referral.close();
+                } catch (SQLException sqlEx) { }
+
+                prepared_stmt_Hospital_Referral = null;
+            }
+            if (prepared_stmt_Provider != null) {
+                try {
+                    prepared_stmt_Provider.close();
+                } catch (SQLException sqlEx) { }
+
+                prepared_stmt_Provider = null;
+            }
+            if (prepared_stmt_Charges != null) {
+                try {
+                    prepared_stmt_Charges.close();
+                } catch (SQLException sqlEx) { }
+
+                prepared_stmt_Charges = null;
             }
         }
 

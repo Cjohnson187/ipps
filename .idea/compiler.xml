@@ -9,7 +9,7 @@
         <module name="ipps" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="12" />
+    <bytecodeTargetLevel target="11" />
   </component>
   <component name="HaskellBuildOptions">
     <ghcPath>C:\Program Files\Haskell Platform\8.6.5\bin\ghc.exe</ghcPath>
