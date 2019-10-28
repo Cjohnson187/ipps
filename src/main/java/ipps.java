@@ -24,9 +24,9 @@ public class ipps {
             //String quote = String.valueOf('"');
             boolean inString = false;
             for (String c : line.split("")) {
-                System.out.println(c);
+                //System.out.println(c);
 
-                System.out.println(line);
+                //System.out.println(line);
                 if (line.length() > 1) {
                     line = line.substring(1);
                 }
@@ -78,30 +78,30 @@ public class ipps {
         PreparedStatement prepared_stmt_Charges = null;
 
 
-        BufferedReader csvReader1 = new BufferedReader(new FileReader
-                ("src\\input_files\\test1.csv" ));
+        //BufferedReader csvReader1 = new BufferedReader(new FileReader
+               // ("src\\input_files\\test1.csv" ));
 
-        /*
+
         BufferedReader csvReader = new BufferedReader(new FileReader
                 ("C:\\Users\\chris\\IdeaProjects\\ipps\\src\\input_files\\" +
                         "Inpatient_Prospective_Payment_System__IPPS__Provider_Summary_for_" +
                         "the_Top_100_Diagnosis-Related_Groups__DRG__-_FY2011.csv"));
 
-        */
+
         // **************************************************************************
 
         try {
             // ***********************************************************************
 
             String query_DRG = " insert into DRG (ID, DRG)"
-                    + " values (?, ?)";
+                    + " values (?, ?) ON DUPLICATE KEY UPDATE ID=ID";
 
-            String query_Hospital_Referral = " insert into Hospital_Referral (Hospital_Referral_State, Hospital_Referral_City)"
-                    + " values (?, ?)";
+            String query_Hospital_Referral = " insert into Hospital_Referral (Refferring_Hospital_ID, Hospital_Referral_State, Hospital_Referral_City)"
+                    + " values (?, ?, ?) ON DUPLICATE KEY UPDATE Hospital_Referral_State=Hospital_Referral_State";
 
             String query_Provider = " insert into Provider (Provider_ID, Provider_Name, Provider_Street_Address, "
-                    + "Provider_City, Provide_State, Provider_Zip)"
-                    + " values (?, ?, ?, ?, ?, ?)";
+                    + "Provider_City, Provider_State, Provider_Zip)"
+                    + " values (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE Provider_ID=Provider_ID";
 
             String query_Charges = " insert into Charges (Total_Discharges, Average_Covered_Charges, Average_Total_Payments, "
                     + "Average_Medicare_Payments, DRG_ID, Provider_ID)"
@@ -114,14 +114,16 @@ public class ipps {
 
 
             // just skipping the header in csv file
-            String heading = csvReader1.readLine();
-            while ((line = csvReader1.readLine()) != null) {
+            String heading = csvReader.readLine();
+            //int counter = 1;
+            while ((line = csvReader.readLine()) != null) {
                 data = csv_split(line);
 
                 int drg_id = Integer.parseInt(data.get(0).substring(0,3));
                 String drg = data.get(0).substring(5);
 
                 int provider_id = Integer.parseInt(data.get(1));
+                System.out.println(provider_id);
                 String prvider_name = data.get(2);
                 String provider_street_address = data.get(3);
                 String provider_city = data.get(4);
@@ -130,6 +132,7 @@ public class ipps {
 
                 String referral_state = data.get(7).substring(0,2);
                 String referral_city = data.get(7).substring(4);
+                System.out.println(referral_state+" " +referral_city+ " "+ provider_state+ " rc rf");
 
                 int total_discharges = Integer.parseInt(data.get(8));
                 float avg_covered_charges = Float.parseFloat(data.get(9));
@@ -141,8 +144,9 @@ public class ipps {
                 prepared_stmt_DRG.setString    (2, drg);
 
                 // Hospital Referral table
-                prepared_stmt_Hospital_Referral.setString (1, referral_state);
-                prepared_stmt_Hospital_Referral.setString (2, referral_city);
+                prepared_stmt_Hospital_Referral.setInt (1, provider_id);
+                prepared_stmt_Hospital_Referral.setString (2, referral_state);
+                prepared_stmt_Hospital_Referral.setString (3, referral_city);
 
                 // provider table
                 prepared_stmt_Provider.setInt (1, provider_id);
@@ -151,6 +155,7 @@ public class ipps {
                 prepared_stmt_Provider.setString (4, provider_city);
                 prepared_stmt_Provider.setString    (5, provider_state);
                 prepared_stmt_Provider.setInt  (6, provider_zip);
+
 
                 // charges table
                 prepared_stmt_Charges.setInt  (1, total_discharges);
@@ -170,7 +175,7 @@ public class ipps {
 
             }
             //test reader just 2 lines in csv file
-            csvReader1.close();
+            csvReader.close();
 
 
             // **********************************************************
