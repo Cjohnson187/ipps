@@ -100,12 +100,12 @@ public class ipps {
                     + " values (?, ?)";
 
             String query_Provider = " insert into Provider (Provider_ID, Provider_Name, Provider_Street_Address, "
-                    + "Provider_City, Provide_State, Provider_Zip, Hospital_Referral_ID)"
+                    + "Provider_City, Provide_State, Provider_Zip)"
                     + " values (?, ?, ?, ?, ?, ?)";
 
             String query_Charges = " insert into Charges (Total_Discharges, Average_Covered_Charges, Average_Total_Payments, "
-                    + "Average_Medicare_Payments)"
-                    + " values (?, ?, ?, ?)";
+                    + "Average_Medicare_Payments, DRG_ID, Provider_ID)"
+                    + " values (?, ?, ?, ?, ?, ?)";
 
             prepared_stmt_DRG = conn.prepareStatement(query_DRG);
             prepared_stmt_Hospital_Referral = conn.prepareStatement(query_Hospital_Referral);
@@ -157,6 +157,9 @@ public class ipps {
                 prepared_stmt_Charges.setFloat  (2, avg_covered_charges);
                 prepared_stmt_Charges.setFloat  (3, avg_total_payments);
                 prepared_stmt_Charges.setFloat  (4, avg_medicare_payments);
+                prepared_stmt_Charges.setInt  (5, drg_id);
+                prepared_stmt_Charges.setInt  (6, provider_id);
+
 
                 // execute the prepared statement
                 prepared_stmt_DRG.execute();
